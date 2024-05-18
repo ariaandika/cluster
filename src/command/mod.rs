@@ -18,8 +18,18 @@ pub fn routes() -> Router {
 }
 
 async fn cors_layer(req: axum::extract::Request, next: axum::middleware::Next) -> Response {
+    let origin = req.headers().get(axum::http::header::ORIGIN).cloned();
     let mut res = next.run(req).await;
-    res.headers_mut().append("Access-Control-Allow-Credentials","true".parse().unwrap());
-    res.headers_mut().append("Access-Control-Allow-Origin","http://localhost:5173".parse().unwrap());
+    let Some(origin) = origin else { return res };
+
+    if origin == "http://localhost:5173" {
+        res.headers_mut().append("Access-Control-Allow-Credentials","true".parse().unwrap());
+        res.headers_mut().append("Access-Control-Allow-Origin","http://localhost:5173".parse().unwrap());
+    }
+    if origin == "https://staff.banter.id" {
+        res.headers_mut().append("Access-Control-Allow-Credentials","true".parse().unwrap());
+        res.headers_mut().append("Access-Control-Allow-Origin","https://staff.banter.id".parse().unwrap());
+    }
+
     res
 }
